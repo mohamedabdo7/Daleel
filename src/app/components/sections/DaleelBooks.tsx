@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SectionHeader from "../common/SectionHeader";
 import { Download } from "lucide-react";
 import Image from "next/image";
@@ -135,7 +135,7 @@ const DaleelBooks: React.FC = () => {
               >
                 {getCurrentBooks().map((book, index) => (
                   <motion.div
-                    key={book.id}
+                    key={book.id + index}
                     variants={bookVariants}
                     className="flex flex-col bg-white rounded-2xl p-8 w-full max-w-md shadow-lg border border-[#E5F3FF] hover:shadow-xl transition-all duration-300"
                     whileHover={{

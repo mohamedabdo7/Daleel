@@ -47,8 +47,8 @@ const CommitteeSection: React.FC = () => (
       <div className="flex flex-col md:flex-row gap-8 md:gap-12 justify-center items-center">
         {committee
           .filter((m) => m.group === "permanent")
-          .map((member) => (
-            <div className="flex flex-col items-center">
+          .map((member, i) => (
+            <div className="flex flex-col items-center" key={member.name + i}>
               <div className="relative flex items-center justify-center w-40 h-32 mb-2">
                 {/* Circle background */}
                 <span className="absolute left-1/2 -translate-x-1/2 top-2 w-32 h-32 rounded-full bg-[#B5E2DD] z-0" />
