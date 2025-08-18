@@ -291,13 +291,20 @@ const Hero = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.1 }}
-            className="w-full"
+            className="w-full sm:w-auto" // full width on mobile, auto on ≥sm
           >
             <Button
               type="submit"
               size="lg"
-              fullWidth // Added fullWidth prop to ensure the button takes full width
-              className="sm:ml-4 rounded-full bg-primary hover:bg-[#0d5aa7] text-white px-6 sm:px-8 py-3 sm:py-2 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              fullWidth // keep for mobile
+              containerClassName="w-full sm:w-auto" // override at ≥sm
+              className="
+      sm:ml-4
+      rounded-full bg-primary hover:bg-[#0d5aa7] text-white
+      px-6 py-3 text-sm                         // mobile
+      sm:px-6 sm:py-2 sm:text-sm sm:h-10        // smaller on ≥sm (like Figma)
+      shadow-lg hover:shadow-xl transition-all duration-300
+    "
             >
               Search
             </Button>
