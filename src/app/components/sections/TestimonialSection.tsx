@@ -166,7 +166,7 @@ const TestimonialSection = () => {
 
                   {/* Testimonial */}
                   <div className="text-[#1976D2] text-sm mt-4 text-center leading-relaxed flex-1">
-                    "{item.text}"
+                    {item.text}
                   </div>
                 </div>
               ))}

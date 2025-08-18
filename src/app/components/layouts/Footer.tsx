@@ -134,6 +134,7 @@ const Footer = () => {
               Download DataElfM App Now!
             </h4>
 
+            {/* Download buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <a
                 href="https://play.google.com/store"
@@ -141,22 +142,29 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="hover:scale-105 hover:-translate-y-1 transition-transform duration-200"
               >
-                <img
+                <Image
                   src="/icons/google-play-badge.png"
                   alt="Get it on Google Play"
+                  width={180}
+                  height={54}
                   className="h-12 w-auto"
+                  sizes="(max-width: 640px) 160px, 180px"
                 />
               </a>
+
               <a
                 href="https://apps.apple.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:scale-105 hover:-translate-y-1 transition-transform duration-200"
               >
-                <img
+                <Image
                   src="/icons/app-store-badge.png"
                   alt="Download on the App Store"
+                  width={180}
+                  height={54}
                   className="h-12 w-auto"
+                  sizes="(max-width: 640px) 160px, 180px"
                 />
               </a>
             </div>
