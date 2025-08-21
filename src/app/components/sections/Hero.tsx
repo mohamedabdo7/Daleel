@@ -189,7 +189,7 @@ const Hero = () => {
 
           <motion.div
             variants={fadeInUp}
-            className="flex flex-row items-center gap-6 sm:gap-8"
+            className="flex flex-row items-center gap-6 sm:gap-8 space-x-12 justify-center"
           >
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -208,7 +208,7 @@ const Hero = () => {
               transition={{ duration: 0.2 }}
             >
               <Image
-                src="/icons/tawuniya.svg"
+                src="/icons/agfund.png"
                 alt="AGFUND"
                 width={80}
                 height={32}
@@ -299,12 +299,12 @@ const Hero = () => {
               fullWidth // keep for mobile
               containerClassName="w-full sm:w-auto" // override at ≥sm
               className="
-      sm:ml-4
-      rounded-full bg-primary hover:bg-[#0d5aa7] text-white
-      px-6 py-3 text-sm                         // mobile
-      sm:px-6 sm:py-2 sm:text-sm sm:h-10        // smaller on ≥sm (like Figma)
-      shadow-lg hover:shadow-xl transition-all duration-300
-    "
+                sm:ml-4
+                rounded-full bg-primary hover:bg-[#0d5aa7] text-white
+                px-6 py-3 text-sm                         // mobile
+                sm:px-6 sm:py-2 sm:text-sm sm:h-10        // smaller on ≥sm (like Figma)
+                shadow-lg hover:shadow-xl transition-all duration-300
+              "
             >
               Search
             </Button>
