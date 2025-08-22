@@ -66,7 +66,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative pt-20 pb-8 sm:pt-24 sm:pb-12 lg:pt-20 lg:pb-16 bg-white min-h-screen">
+    <section className="relative pb-8 sm:pb-12 min-h-screen">
       {/* Content Container */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10 relative">
         {/* Headline with letter-by-letter animation */}
