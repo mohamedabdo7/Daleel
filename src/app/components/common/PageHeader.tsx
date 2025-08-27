@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface PageHeaderProps {
   title: string;
@@ -114,10 +115,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {/* Image Container */}
             <motion.div variants={itemVariants} className="flex-shrink-0">
               <div className="relative">
-                <img
+                <Image
                   src={iconSrc}
                   alt={iconAlt}
                   className="w-full h-full object-contain filter"
+                  width={48}
+                  height={48}
                 />
               </div>
             </motion.div>

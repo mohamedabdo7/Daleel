@@ -3,7 +3,6 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.95 },

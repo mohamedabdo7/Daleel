@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SectionHeader from "../common/SectionHeader";
 import { Download } from "lucide-react";
 import Image from "next/image";
@@ -284,7 +284,7 @@ const DaleelBooks: React.FC = () => {
                 exit="exit"
                 className="flex flex-col lg:flex-row gap-8 lg:gap-4 xl:gap-4 justify-center items-center lg:items-stretch"
               >
-                {getCurrentBooks().map((book, index) => (
+                {getCurrentBooks().map((book) => (
                   <motion.div
                     key={`${book.id}-${currentSlide}`}
                     variants={bookVariants}

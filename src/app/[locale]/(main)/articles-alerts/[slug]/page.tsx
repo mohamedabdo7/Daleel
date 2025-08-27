@@ -12,8 +12,6 @@ import {
   MessageCircle,
   Calendar,
   ArrowLeft,
-  Share2,
-  Bookmark,
 } from "lucide-react";
 import { getAlertBySlug, type Alert } from "@/lib/api/articles-alerts.service";
 import { qk } from "@/lib/queryKeys";
@@ -96,8 +94,7 @@ export default function AlertDetailPage() {
               Alert Not Found
             </h1>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              The alert you're looking for doesn't exist or may have been
-              removed. Please check the link or return to the alerts list.
+              {`The alert you're looking for doesn't exist or may have been removed. Please check the link or return to the alerts list.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button

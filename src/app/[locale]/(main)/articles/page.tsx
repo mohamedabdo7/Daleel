@@ -102,18 +102,18 @@ export default function ArticlesPage() {
     setIsSidebarOpen(false);
   };
 
-  const selectedCategoryTitle = useMemo(
-    () => categories?.find((c) => c.slug === selectedCategory)?.title,
-    [categories, selectedCategory]
-  );
-  const selectedArticleTitle = useMemo(() => {
-    if (!selectedArticle) return undefined;
-    const parent = items.find((it) =>
-      it.children?.some((c) => c.id === selectedArticle)
-    );
-    const child = parent?.children?.find((c) => c.id === selectedArticle);
-    return child?.title;
-  }, [items, selectedArticle]);
+  // const selectedCategoryTitle = useMemo(
+  //   () => categories?.find((c) => c.slug === selectedCategory)?.title,
+  //   [categories, selectedCategory]
+  // );
+  // const selectedArticleTitle = useMemo(() => {
+  //   if (!selectedArticle) return undefined;
+  //   const parent = items.find((it) =>
+  //     it.children?.some((c) => c.id === selectedArticle)
+  //   );
+  //   const child = parent?.children?.find((c) => c.id === selectedArticle);
+  //   return child?.title;
+  // }, [items, selectedArticle]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

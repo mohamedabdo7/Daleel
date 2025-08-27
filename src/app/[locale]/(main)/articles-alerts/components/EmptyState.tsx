@@ -33,7 +33,7 @@ export default function EmptyState({ searchKeyword }: EmptyStateProps) {
         <p className="text-gray-600 text-sm sm:text-base mb-6">
           {searchKeyword ? (
             <>
-              We couldn't find any alerts matching{" "}
+              We couldn&apos;t find any alerts matching{" "}
               <span className="font-medium">"{searchKeyword}"</span>. Try
               adjusting your search terms.
             </>
