@@ -1,15 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "../common/SectionHeader";
 import { Button } from "../common/Button";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 
 // Type definitions
 interface ScientificCommitteeMember {
   name: string;
   image: string;
-  desc: string; // This maps to "title" in your original component
+  desc: string;
 }
 
 interface ScientificCommitteeData {
@@ -21,6 +21,14 @@ interface ScientificCommitteeProps {
   scientificCommittee: ScientificCommitteeData[];
 }
 
+// Dynamic import for Image to avoid SSR issues
+const Image = dynamic(() => import("next/image"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
+  ),
+});
+
 const VISIBLE = 5; // Number of cards visible at once
 
 const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
@@ -28,15 +36,39 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
 }) => {
   // Get the first committee's data, or use empty array as fallback
   const members = scientificCommittee[0]?.data || [];
-  const [activeIndex, setActiveIndex] = useState(2); // Start with middle card active
+  const [activeIndex, setActiveIndex] = useState(2);
+  const [isClient, setIsClient] = useState(false);
+  const [imageLoadStates, setImageLoadStates] = useState<
+    Record<string, "loading" | "loaded" | "error">
+  >({});
 
-  // If no members, don't render the component
-  if (members.length === 0) {
-    return null;
+  // Ensure we're on the client side before rendering
+  useEffect(() => {
+    setIsClient(true);
+    // Initialize image states
+    const initialStates: Record<string, "loading" | "loaded" | "error"> = {};
+    members.forEach((member) => {
+      initialStates[member.name] = "loading";
+    });
+    setImageLoadStates(initialStates);
+  }, [members]);
+
+  // Don't render anything until we're sure we're on the client
+  if (!isClient || members.length === 0) {
+    return (
+      <section className="w-full bg-white py-10 px-2 md:px-0">
+        <div className="flex justify-center">
+          <div className="animate-pulse bg-gray-200 h-8 w-64 rounded"></div>
+        </div>
+      </section>
+    );
   }
 
   // Ensure activeIndex is valid for the current members array
-  const validActiveIndex = Math.min(activeIndex, members.length - 1);
+  const validActiveIndex = Math.min(
+    Math.max(0, activeIndex),
+    members.length - 1
+  );
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : members.length - 1));
@@ -44,6 +76,14 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev < members.length - 1 ? prev + 1 : 0));
+  };
+
+  const handleImageLoad = (memberName: string) => {
+    setImageLoadStates((prev) => ({ ...prev, [memberName]: "loaded" }));
+  };
+
+  const handleImageError = (memberName: string) => {
+    setImageLoadStates((prev) => ({ ...prev, [memberName]: "error" }));
   };
 
   // Calculate visible cards around the active card
@@ -71,6 +111,44 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
 
   const visibleCards = getVisibleCards();
 
+  const MemberImage = ({
+    member,
+    isActive,
+  }: {
+    member: ScientificCommitteeMember;
+    isActive: boolean;
+  }) => {
+    const imageState = imageLoadStates[member.name];
+    const size = isActive ? 96 : 64;
+
+    if (!member.image || imageState === "error") {
+      return (
+        <div className="w-full h-full bg-[#B5E2DD] flex items-center justify-center text-white font-bold text-lg rounded-full">
+          {member.name.charAt(0).toUpperCase()}
+        </div>
+      );
+    }
+
+    if (imageState === "loading") {
+      return (
+        <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
+      );
+    }
+
+    return (
+      <Image
+        src={member.image}
+        alt={member.name}
+        width={size}
+        height={size}
+        className="w-full h-full object-cover rounded-full"
+        onLoad={() => handleImageLoad(member.name)}
+        onError={() => handleImageError(member.name)}
+        priority={isActive}
+      />
+    );
+  };
+
   return (
     <section className="w-full bg-white py-10 px-2 md:px-0">
       <SectionHeader
@@ -86,24 +164,24 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
 
             // Determine spacing - more space around active card
             let marginClass = "";
-            if (position === -1) marginClass = "mr-12"; // Left adjacent card
-            else if (position === 1)
-              marginClass = "ml-12"; // Right adjacent card
-            else if (position === -2) marginClass = "mr-4"; // Far left card
-            else if (position === 2) marginClass = "ml-4"; // Far right card
-            else if (position === 0) marginClass = "mx-8"; // Active card
+            if (position === -1) marginClass = "mr-12";
+            else if (position === 1) marginClass = "ml-12";
+            else if (position === -2) marginClass = "mr-4";
+            else if (position === 2) marginClass = "ml-4";
+            else if (position === 0) marginClass = "mx-8";
 
             return (
               <div
-                key={`${member.name}-${idx}`}
+                key={`${member.name}-${position}-${validActiveIndex}`}
                 className={`relative flex items-center ${marginClass}`}
               >
-                {/* Left Arrow - shows only for the card immediately left of active */}
+                {/* Left Arrow */}
                 {position === -1 && (
                   <button
                     className="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                     onClick={handlePrev}
                     aria-label="Previous member"
+                    type="button"
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -123,20 +201,7 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
                       isActive ? "w-24 h-24" : "w-16 h-16"
                     }`}
                   >
-                    {member.image ? (
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={96} // لازم تحدد width & height
-                        height={96}
-                        className="w-full h-full object-cover rounded-full"
-                        onError={() => {
-                          // fallback لو الصورة مش موجودة
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#B5E2DD]" />
-                    )}
+                    <MemberImage member={member} isActive={isActive} />
                   </div>
 
                   {/* Member Name */}
@@ -162,12 +227,13 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
                   </div>
                 </div>
 
-                {/* Right Arrow - shows only for the card immediately right of active */}
+                {/* Right Arrow */}
                 {position === 1 && (
                   <button
                     className="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                     onClick={handleNext}
                     aria-label="Next member"
+                    type="button"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -182,12 +248,13 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
       <div className="flex justify-center gap-1 mt-6">
         {members.map((_, idx) => (
           <button
-            key={idx}
+            key={`dot-${idx}`}
             className={`w-2 h-2 rounded-full transition-all duration-200 ${
               idx === validActiveIndex ? "bg-[#1976D2]" : "bg-[#C7E2F6]"
             }`}
             onClick={() => setActiveIndex(idx)}
             aria-label={`Go to slide ${idx + 1}`}
+            type="button"
           />
         ))}
       </div>
