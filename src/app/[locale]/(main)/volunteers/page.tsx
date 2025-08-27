@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Users, AlertCircle, Search, Filter } from "lucide-react";
+import { Heart, Users, AlertCircle, Search } from "lucide-react";
 import { getAboutData } from "@/lib/api/about.service";
 import { qk } from "@/lib/queryKeys";
 import VolunteerCard from "./components/VolunteerCard";

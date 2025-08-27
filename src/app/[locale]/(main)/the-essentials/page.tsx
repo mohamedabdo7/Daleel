@@ -222,19 +222,19 @@ export default function EssentialsPage() {
     setIsSidebarOpen(false);
   };
 
-  const selectedLessonTitle = useMemo(() => {
-    if (!selectedLesson) return undefined;
-    const findTitle = (arr: SidebarDeepItem[]): string | undefined => {
-      for (const n of arr) {
-        if (n.id === selectedLesson) return n.title;
-        if (n.children) {
-          const t = findTitle(n.children);
-          if (t) return t;
-        }
-      }
-    };
-    return findTitle(items);
-  }, [items, selectedLesson]);
+  // const selectedLessonTitle = useMemo(() => {
+  //   if (!selectedLesson) return undefined;
+  //   const findTitle = (arr: SidebarDeepItem[]): string | undefined => {
+  //     for (const n of arr) {
+  //       if (n.id === selectedLesson) return n.title;
+  //       if (n.children) {
+  //         const t = findTitle(n.children);
+  //         if (t) return t;
+  //       }
+  //     }
+  //   };
+  //   return findTitle(items);
+  // }, [items, selectedLesson]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

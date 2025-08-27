@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { hbGetLessonDetail } from "@/lib/api/handbook.service";
 import { qk } from "@/lib/queryKeys";
@@ -52,15 +52,15 @@ export default function HandbookContent({
   const views = payload?.views_count;
   const likes = payload?.likes_count;
 
-  const isPdf = useMemo(() => {
-    if (!fileUrl) return false;
-    try {
-      const lower = fileUrl.toLowerCase();
-      return lower.endsWith(".pdf") || lower.includes("application/pdf");
-    } catch {
-      return false;
-    }
-  }, [fileUrl]);
+  // const isPdf = useMemo(() => {
+  //   if (!fileUrl) return false;
+  //   try {
+  //     const lower = fileUrl.toLowerCase();
+  //     return lower.endsWith(".pdf") || lower.includes("application/pdf");
+  //   } catch {
+  //     return false;
+  //   }
+  // }, [fileUrl]);
 
   const dateLabel = createdAt
     ? new Date(createdAt).toLocaleDateString(undefined, {

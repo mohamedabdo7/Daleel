@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { esGetLessonDetail } from "@/lib/api/essentials.service";
 import { qk } from "@/lib/queryKeys";
@@ -45,15 +45,15 @@ export default function EssentialsContent({
   const views = payload?.views_count;
   const likes = payload?.likes_count;
 
-  const isPdf = useMemo(() => {
-    if (!fileUrl) return false;
-    try {
-      const lower = fileUrl.toLowerCase();
-      return lower.endsWith(".pdf") || lower.includes("application/pdf");
-    } catch {
-      return false;
-    }
-  }, [fileUrl]);
+  // const isPdf = useMemo(() => {
+  //   if (!fileUrl) return false;
+  //   try {
+  //     const lower = fileUrl.toLowerCase();
+  //     return lower.endsWith(".pdf") || lower.includes("application/pdf");
+  //   } catch {
+  //     return false;
+  //   }
+  // }, [fileUrl]);
 
   const isPlaceholderFile = (u?: string) =>
     !!u &&
