@@ -82,12 +82,20 @@
 
   html {
     @apply scroll-smooth;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     overflow-x: hidden;
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
     min-height: 100dvh;
   }
 
