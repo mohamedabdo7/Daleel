@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Daleel",
+  title: "Family Medical Guide",
   description: "A modern Next.js application for innovative tech solutions",
 };
 

@@ -2,30 +2,39 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 
 interface PageHeaderProps {
   title: string;
   description: string;
-  iconSrc: string;
-  iconAlt: string;
-  // Search related props - all optional
+  iconSrc?: string;
+  iconAlt?: string;
   searchPlaceholder?: string;
-  onSearch?: (query: string) => void;
+  searchValue?: string;
+  onSearch?: (query: string) => void; // Called on button click or Enter
+  onSearchInputChange?: (query: string) => void; // Called on input change
   showSearch?: boolean;
+  isSearchLoading?: boolean;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
-  iconSrc,
+  iconSrc = "/icons/articles-icon.svg",
   iconAlt,
   // Search props with defaults
   searchPlaceholder = "",
+  searchValue = "", // Default empty string
   onSearch,
+  onSearchInputChange, // New prop for input changes
   showSearch = false, // Default to false - search is opt-in
+  isSearchLoading = false, // Default to false
 }) => {
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [internalSearchQuery, setInternalSearchQuery] = React.useState("");
+
+  // Use controlled value if provided, otherwise use internal state
+  const searchQuery =
+    searchValue !== undefined ? searchValue : internalSearchQuery;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,13 +60,32 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   };
 
   const handleSearch = () => {
-    if (onSearch) {
+    if (onSearch && !isSearchLoading) {
       onSearch(searchQuery);
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // If searchValue prop is provided, we're in controlled mode
+    if (searchValue !== undefined) {
+      // Call onSearchInputChange to let parent handle the state
+      if (onSearchInputChange) {
+        onSearchInputChange(value);
+      }
+    } else {
+      // We're in uncontrolled mode, update internal state
+      setInternalSearchQuery(value);
+      // Still call onSearchInputChange if provided
+      if (onSearchInputChange) {
+        onSearchInputChange(value);
+      }
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isSearchLoading) {
       handleSearch();
     }
   };
@@ -76,7 +104,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-300 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
 
-        <div className="relative px-8 sm:px-12 lg:px-16 py-12 sm:py-16 lg:py-18">
+        <div className="relative px-8 sm:px-12 lg:px-16 py-6 sm:py-10 lg:py-12">
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -89,7 +117,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 <img
                   src={iconSrc}
                   alt={iconAlt}
-                  className="w-full h-full object-contain filter brightness-0 invert"
+                  className="w-full h-full object-contain filter"
                 />
               </div>
             </motion.div>
@@ -122,17 +150,26 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                       type="text"
                       placeholder={searchPlaceholder}
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
-                      className="flex-1 px-3 py-3 text-gray-700 focus:outline-none bg-transparent min-w-0"
+                      disabled={isSearchLoading}
+                      className="flex-1 px-3 py-3 text-gray-700 focus:outline-none bg-transparent min-w-0 disabled:opacity-50"
                     />
                   </div>
                   <button
                     onClick={handleSearch}
-                    className="px-8 py-3 m-1 font-semibold text-white transition-colors rounded-full hover:opacity-90"
+                    disabled={isSearchLoading}
+                    className="px-8 py-3 m-1 font-semibold text-white transition-all duration-200 rounded-full hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
                     style={{ backgroundColor: "#136FB7" }}
                   >
-                    Search
+                    {isSearchLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      "Search"
+                    )}
                   </button>
                 </div>
               </motion.div>

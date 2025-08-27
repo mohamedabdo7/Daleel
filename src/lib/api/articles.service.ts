@@ -1,4 +1,4 @@
-import { apiFetch } from "../api/client";
+import { apiFetch } from "@/lib/api/client";
 
 // === Types ===
 export interface Category {
@@ -22,7 +22,6 @@ export interface ArticleDetail {
   id: number;
   slug: string;
   title: string;
-  // The API returns HTML; field name may be `content` or similar
   content?: string; // HTML string
   body?: string; // fallback
   [k: string]: unknown;

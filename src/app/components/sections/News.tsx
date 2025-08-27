@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Calendar, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import SectionHeader from "../common/SectionHeader";
 
 const news = [
@@ -49,101 +50,278 @@ const news = [
   },
 ];
 
-const CARDS_VISIBLE = 3;
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15,
+      duration: 0.6,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    scale: 0.95,
+    transition: {
+      duration: 0.3,
+    },
+  },
+};
+
+const buttonVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 15,
+    },
+  },
+  hover: {
+    scale: 1.1,
+    backgroundColor: "#E6F0FA",
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 17,
+    },
+  },
+  tap: {
+    scale: 0.95,
+    transition: {
+      duration: 0.1,
+    },
+  },
+  disabled: {
+    opacity: 0.3,
+    scale: 1,
+    transition: {
+      duration: 0.2,
+    },
+  },
+};
+
+const dotVariants = {
+  inactive: {
+    scale: 1,
+    backgroundColor: "#C7E2F6",
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20,
+    },
+  },
+  active: {
+    scale: 1.2,
+    backgroundColor: "#1976D2",
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 20,
+    },
+  },
+};
 
 const LatestNewsSection = () => {
   const [start, setStart] = useState(0);
+  const [cardsVisible, setCardsVisible] = useState(3);
+
+  // Responsive cards count
+  useEffect(() => {
+    const updateCardsVisible = () => {
+      if (window.innerWidth < 640) {
+        setCardsVisible(1); // Mobile: 1 card
+      } else if (window.innerWidth < 1024) {
+        setCardsVisible(2); // Tablet: 2 cards
+      } else {
+        setCardsVisible(3); // Desktop: 3 cards
+      }
+    };
+
+    updateCardsVisible();
+    window.addEventListener("resize", updateCardsVisible);
+    return () => window.removeEventListener("resize", updateCardsVisible);
+  }, []);
+
+  // Auto-adjust start index when screen size changes
+  useEffect(() => {
+    if (start > news.length - cardsVisible) {
+      setStart(Math.max(0, news.length - cardsVisible));
+    }
+  }, [cardsVisible, start]);
 
   const handlePrev = () => {
     setStart((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
   const handleNext = () => {
-    setStart((prev) => (prev < news.length - CARDS_VISIBLE ? prev + 1 : prev));
+    setStart((prev) => (prev < news.length - cardsVisible ? prev + 1 : prev));
   };
 
-  const visibleNews = news.slice(start, start + CARDS_VISIBLE);
+  const visibleNews = news.slice(start, start + cardsVisible);
+  const maxDots = news.length - cardsVisible + 1;
 
   return (
-    <section className="w-full py-12 px-2 md:px-0">
-      <SectionHeader
-        primaryText="Latest"
-        secondaryText="News"
-        className="mb-8 md:mb-10"
-      />
-      <div className="flex justify-center items-center gap-4">
-        <button
-          onClick={handlePrev}
-          disabled={start === 0}
-          className={`rounded-full bg-white shadow-md border border-[#E6F0FA] text-[#1976D2] hover:bg-[#E6F0FA] transition w-10 h-10 flex items-center justify-center ${
-            start === 0 ? "opacity-30 pointer-events-none" : ""
-          }`}
-          aria-label="Previous"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <div className="flex gap-6 flex-wrap justify-center max-w-5xl">
-          {visibleNews.map((item, idx) => (
-            <div
-              key={idx + start}
-              className="bg-[#F3F8FE] rounded-2xl w-[300px] h-[340px] flex flex-col shadow-sm overflow-hidden"
-            >
-              <div className="relative flex-1">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover w-full h-full rounded-3xl"
-                  sizes="300px"
-                />
-                <div className="absolute bottom-0 left-0 w-full">
-                  <div className="bg-[#E6F3FE] rounded-2xl p-4 flex flex-col">
-                    <div className="text-[#1976D2] text-sm font-medium mb-4 leading-snug">
-                      {item.title}
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-[#1976D2] mt-auto">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={16} className="opacity-70" />
-                        {item.date}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <User size={16} className="opacity-70" />
-                        {item.author}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <motion.section
+      className="w-full py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={containerVariants}
+    >
+      <motion.div variants={cardVariants} className="max-w-7xl mx-auto">
+        <SectionHeader
+          primaryText="Latest"
+          secondaryText="News"
+          className="mb-8 md:mb-12"
+        />
+
+        <div className="flex justify-center items-center gap-3 sm:gap-6">
+          {/* Previous Button */}
+          <motion.button
+            onClick={handlePrev}
+            disabled={start === 0}
+            className="rounded-full bg-white shadow-lg border border-[#E6F0FA] text-[#1976D2] 
+                     w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center
+                     disabled:pointer-events-none backdrop-blur-sm"
+            aria-label="Previous"
+            variants={buttonVariants}
+            initial="hidden"
+            animate={start === 0 ? "disabled" : "visible"}
+            whileHover={start === 0 ? {} : "hover"}
+            whileTap={start === 0 ? {} : "tap"}
+          >
+            <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+          </motion.button>
+
+          {/* Cards Container */}
+          <div className="flex-1 max-w-6xl">
+            <div className="relative overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={start}
+                  className="flex gap-4 sm:gap-6 justify-center"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  {visibleNews.map((item, idx) => (
+                    <motion.div
+                      key={idx + start}
+                      className="bg-[#F3F8FE] rounded-2xl 
+                               w-full sm:w-[280px] lg:w-[320px] h-[320px] sm:h-[360px] 
+                               flex flex-col shadow-sm overflow-hidden"
+                      variants={cardVariants}
+                      layout
+                    >
+                      <div className="relative flex-1">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          className="object-cover w-full h-full rounded-3xl"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+
+                        <div className="absolute bottom-0 left-0 w-full">
+                          <motion.div
+                            className="bg-[#E6F3FE] rounded-2xl p-4 flex flex-col"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3, duration: 0.5 }}
+                          >
+                            <div className="text-[#1976D2] text-sm font-medium mb-4 leading-snug">
+                              {item.title}
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-[#1976D2] mt-auto">
+                              <span className="flex items-center gap-1">
+                                <Calendar size={16} className="opacity-70" />
+                                {item.date}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <User size={16} className="opacity-70" />
+                                {item.author}
+                              </span>
+                            </div>
+                          </motion.div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </div>
-          ))}
+          </div>
+
+          {/* Next Button */}
+          <motion.button
+            onClick={handleNext}
+            disabled={start >= news.length - cardsVisible}
+            className="rounded-full bg-white shadow-lg border border-[#E6F0FA] text-[#1976D2]
+                     w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center
+                     disabled:pointer-events-none backdrop-blur-sm"
+            aria-label="Next"
+            variants={buttonVariants}
+            initial="hidden"
+            animate={
+              start >= news.length - cardsVisible ? "disabled" : "visible"
+            }
+            whileHover={start >= news.length - cardsVisible ? {} : "hover"}
+            whileTap={start >= news.length - cardsVisible ? {} : "tap"}
+          >
+            <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+          </motion.button>
         </div>
-        <button
-          onClick={handleNext}
-          disabled={start >= news.length - CARDS_VISIBLE}
-          className={`rounded-full bg-white shadow-md border border-[#E6F0FA] text-[#1976D2] hover:bg-[#E6F0FA] transition w-10 h-10 flex items-center justify-center ${
-            start >= news.length - CARDS_VISIBLE
-              ? "opacity-30 pointer-events-none"
-              : ""
-          }`}
-          aria-label="Next"
-        >
-          <ChevronRight size={24} />
-        </button>
-      </div>
-      {/* Dots */}
-      <div className="flex justify-center gap-1 mt-6">
-        {Array.from({ length: news.length - CARDS_VISIBLE + 1 }).map(
-          (_, idx) => (
-            <span
-              key={idx}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                idx === start ? "bg-[#1976D2]" : "bg-[#C7E2F6]"
-              }`}
-            />
-          )
+
+        {/* Pagination Dots */}
+        {maxDots > 1 && (
+          <motion.div
+            className="flex justify-center gap-2 mt-6 sm:mt-8"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {Array.from({ length: maxDots }).map((_, idx) => (
+              <motion.button
+                key={idx}
+                onClick={() => setStart(idx)}
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300
+                         hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#1976D2]/30"
+                variants={dotVariants}
+                animate={idx === start ? "active" : "inactive"}
+                whileHover={{ scale: 1.3 }}
+                whileTap={{ scale: 0.9 }}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </motion.div>
         )}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 };
 
