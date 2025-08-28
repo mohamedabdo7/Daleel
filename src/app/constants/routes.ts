@@ -26,20 +26,3 @@ export const ROUTES = {
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
-
-// // src/routes.ts
-
-// export const ROUTES = {
-//   HOME: "/",
-//   THE_ESSENTIALS: "/the-essentials",
-//   THE_HANDBOOK: "/the-handbook",
-//   NEW_ARTICLES: "/new-articles",
-//   ARTICLES: "/articles",
-//   ARTICLES_ALERTS: "/articles-alerts",
-//   POWER_POINTS: "/power-points",
-//   PROTOCOLS: "/protocols",
-//   LECTURES: "/lectures",
-//   FLASHCARDS: "/flashcards",
-// } as const;
-
-// export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

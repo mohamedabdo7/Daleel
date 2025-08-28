@@ -134,9 +134,10 @@ export const CreateExamForm: React.FC = () => {
     setMaxQuestions(0);
   };
 
-  const needsSectionSelection = ["incorrect", "flagged", "unused"].includes(
-    watchedQuestionType || ""
-  );
+  // const needsSectionSelection = ["incorrect", "flagged", "unused"].includes(
+  //   watchedQuestionType || ""
+  // );
+  const needsSectionSelection = !!watchedQuestionType;
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -381,7 +382,7 @@ export const CreateExamForm: React.FC = () => {
             </div>
 
             {/* Chapters Selector */}
-            {watchedChaptersType && (
+            {watchedQuestionType && (
               <ChaptersSelector
                 control={form.control}
                 onMaxQuestionsChange={setMaxQuestions}

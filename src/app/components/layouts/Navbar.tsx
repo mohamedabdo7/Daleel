@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../common/Button";
 import { ROUTES } from "@/app/constants/routes";
+import { SimpleLogoutButton } from "@/app/[locale]/(main)/login/components/ogout-button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -85,6 +86,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
+            <SimpleLogoutButton />
             <motion.div
               className="flex items-center space-x-3 cursor-pointer"
               whileHover={{ scale: 1.05 }}
