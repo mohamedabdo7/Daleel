@@ -663,7 +663,7 @@ export default function ExamPage() {
                   (examData.mode === "tutor" && isAnswerChecked)
                 }
                 showResult={
-                  examData.mode === "tutor" && isAnswerChecked && checkResult
+                  examData.mode === "tutor" && isAnswerChecked && !!checkResult
                 }
                 examMode={examData.mode}
                 questionNumber={currentIndex + 1}
