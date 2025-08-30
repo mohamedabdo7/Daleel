@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation"; // to detect current lang from the URL
+import { useParams } from "next/navigation";
+import { Play, Video } from "lucide-react";
 import { ROUTES } from "@/app/constants/routes";
 
 type Lecture = {
@@ -112,28 +113,7 @@ export default function LectureCard({ lecture }: { lecture: Lecture }) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-gray-400">
-            <svg
-              className="h-12 w-12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 10.5l-6-3.273v9.546l6-3.273z"
-              />
-              <rect
-                x="3"
-                y="4"
-                width="18"
-                height="16"
-                rx="3"
-                ry="3"
-                strokeWidth="1.5"
-              />
-            </svg>
+            <Video className="h-12 w-12" />
           </div>
         )}
 
@@ -143,13 +123,7 @@ export default function LectureCard({ lecture }: { lecture: Lecture }) {
         {/* play badge */}
         <div className="absolute left-3 bottom-3">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-white/90 backdrop-blur transition group-hover:bg-white">
-            <svg
-              className="h-6 w-6 text-primary-600"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
+            <Play className="h-6 w-6 text-primary-600 fill-current" />
           </div>
         </div>
 
@@ -164,7 +138,7 @@ export default function LectureCard({ lecture }: { lecture: Lecture }) {
 
       {/* meta */}
       <div className="flex items-center justify-between px-4 py-3 text-xs text-gray-600">
-        <span>Views: {lecture.views_count ?? 0}</span>
+        {/* <span>Views: {lecture.views_count ?? 0}</span> */}
         <span>{new Date(lecture.created_at).toLocaleDateString()}</span>
       </div>
     </Link>

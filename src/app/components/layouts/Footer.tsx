@@ -137,7 +137,7 @@ const Footer = () => {
             {/* Download buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="https://play.google.com/store"
+                href="https://play.google.com/store/apps/details?id=com.app.DalelApp"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:scale-105 hover:-translate-y-1 transition-transform duration-200"
@@ -153,7 +153,7 @@ const Footer = () => {
               </a>
 
               <a
-                href="https://apps.apple.com/"
+                href="https://apps.apple.com/sa/app/daleel-fm/id6743419756"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:scale-105 hover:-translate-y-1 transition-transform duration-200"

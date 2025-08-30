@@ -72,4 +72,11 @@ export const qk = {
     items: (categorySlug: string, page: number = 1) =>
       ["flashcards", "items", categorySlug, { page }] as const,
   },
+
+  events: {
+    list: (params?: { page?: number; keyword?: string; per_page?: number }) =>
+      ["events", "list", params] as const,
+    item: (id: number) => ["events", "item", id] as const,
+    itemBySlug: (slug: string) => ["events", "item-by-slug", slug] as const,
+  },
 } as const;

@@ -1,9 +1,9 @@
 // privacy/page.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   Lock,
@@ -12,39 +12,99 @@ import {
   Users,
   Globe,
   AlertCircle,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { getPrivacyPolicy } from "@/lib/api/policy.service";
 import { qk } from "@/lib/queryKeys";
 
-// Utility function to add IDs to headings in HTML content
-const addNavigationIds = (htmlContent: string) => {
-  if (!htmlContent) return htmlContent;
+// Enhanced utility function to split content by sections and add IDs
+const processPrivacyContent = (htmlContent: string) => {
+  if (!htmlContent) return { processedContent: "", sections: [] };
 
   const sectionMapping = [
-    { regex: /Interpretation and Definitions/i, id: "interpretation" },
+    {
+      regex: /Interpretation and Definitions/i,
+      id: "interpretation",
+      title: "Interpretation and Definitions",
+    },
     {
       regex: /Collecting and Using Your Personal Data/i,
       id: "collecting-data",
+      title: "Collecting and Using Your Personal Data",
     },
-    { regex: /Use of Your Personal Data/i, id: "use-data" },
-    { regex: /Retention of Your Personal Data/i, id: "retention" },
-    { regex: /Transfer of Your Personal Data/i, id: "transfer" },
-    { regex: /Security of Your Personal Data/i, id: "security" },
-    { regex: /Children's Privacy/i, id: "children" },
-    { regex: /Contact Us/i, id: "contact" },
+    {
+      regex: /Use of Your Personal Data/i,
+      id: "use-data",
+      title: "Use of Your Personal Data",
+    },
+    {
+      regex: /Retention of Your Personal Data/i,
+      id: "retention",
+      title: "Retention of Your Personal Data",
+    },
+    {
+      regex: /Transfer of Your Personal Data/i,
+      id: "transfer",
+      title: "Transfer of Your Personal Data",
+    },
+    {
+      regex: /Security of Your Personal Data/i,
+      id: "security",
+      title: "Security of Your Personal Data",
+    },
+    {
+      regex: /Children's Privacy/i,
+      id: "children",
+      title: "Children's Privacy",
+    },
+    { regex: /Contact Us/i, id: "contact", title: "Contact Us" },
   ];
 
   let processedContent = htmlContent;
 
+  // Add IDs to sections
   sectionMapping.forEach(({ regex, id }) => {
-    // Add IDs to h2 tags that match our navigation sections
     processedContent = processedContent.replace(
       new RegExp(`(<h2[^>]*>)(.*?${regex.source}.*?)(</h2>)`, "gi"),
       `$1<span id="${id}"></span>$2$3`
     );
   });
 
-  return processedContent;
+  // Split content into sections
+  const sections = [];
+  const h2Regex = /<h2[^>]*>.*?<\/h2>/gi;
+  const h2Matches = Array.from(processedContent.matchAll(h2Regex));
+
+  for (let i = 0; i < h2Matches.length; i++) {
+    const currentMatch = h2Matches[i];
+    const nextMatch = h2Matches[i + 1];
+
+    const startIndex = currentMatch.index;
+    const endIndex = nextMatch ? nextMatch.index : processedContent.length;
+
+    const sectionContent = processedContent.substring(startIndex, endIndex);
+
+    // Find matching section info
+    const matchedSection = sectionMapping.find(({ regex }) =>
+      regex.test(currentMatch[0])
+    );
+
+    if (matchedSection) {
+      sections.push({
+        id: matchedSection.id,
+        title: matchedSection.title,
+        content: sectionContent,
+      });
+    }
+  }
+
+  // Get intro content (before first h2)
+  const firstH2Index = processedContent.search(h2Regex);
+  const introContent =
+    firstH2Index > 0 ? processedContent.substring(0, firstH2Index) : "";
+
+  return { processedContent, sections, introContent };
 };
 
 // Animation variants
@@ -90,6 +150,36 @@ const cardVariants = {
   },
 };
 
+const collapseVariants = {
+  expanded: {
+    height: "auto",
+    opacity: 1,
+    transition: {
+      height: {
+        duration: 0.3,
+        ease: "easeOut",
+      },
+      opacity: {
+        duration: 0.25,
+        delay: 0.1,
+      },
+    },
+  },
+  collapsed: {
+    height: 0,
+    opacity: 0,
+    transition: {
+      height: {
+        duration: 0.3,
+        ease: "easeIn",
+      },
+      opacity: {
+        duration: 0.2,
+      },
+    },
+  },
+};
+
 // Feature cards data
 const privacyFeatures = [
   {
@@ -122,6 +212,81 @@ const privacyFeatures = [
   },
 ];
 
+// CollapsibleSection component for mobile
+const CollapsibleSection = ({
+  section,
+  index,
+}: {
+  section: any;
+  index: number;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(index === 0); // First section expanded by default
+
+  return (
+    <motion.div
+      className="border-b border-gray-200 last:border-b-0"
+      initial={false}
+      variants={itemVariants}
+    >
+      <motion.button
+        className={`w-full flex items-center justify-between p-4 text-left transition-colors duration-200 ${
+          isExpanded
+            ? "bg-gradient-to-r from-[#1D4671] to-[#153654] text-white"
+            : "hover:bg-gray-50 text-gray-900"
+        }`}
+        onClick={() => setIsExpanded(!isExpanded)}
+        whileTap={{ scale: 0.98 }}
+      >
+        <h3
+          className={`text-lg font-semibold pr-4 ${
+            isExpanded ? "text-white" : "text-gray-900"
+          }`}
+        >
+          {section.title}
+        </h3>
+        <motion.div
+          animate={{ rotate: isExpanded ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex-shrink-0"
+        >
+          <ChevronRight className="w-5 h-5 text-gray-500" />
+        </motion.div>
+      </motion.button>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial="collapsed"
+            animate="expanded"
+            exit="collapsed"
+            variants={collapseVariants}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4">
+              <div
+                className="prose prose-gray max-w-none
+                  prose-headings:text-gray-900 prose-headings:font-bold
+                  prose-h2:text-xl prose-h2:mt-6 prose-h2:mb-3 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2
+                  prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-2
+                  prose-h4:text-base prose-h4:mt-3 prose-h4:mb-2
+                  prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-3 prose-p:text-sm
+                  prose-ul:text-gray-600 prose-ul:mb-3 prose-ul:text-sm
+                  prose-li:mb-1
+                  prose-strong:text-gray-800 prose-strong:font-semibold
+                  prose-a:text-[#1D4671] prose-a:no-underline hover:prose-a:underline
+                  prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-xs"
+                dangerouslySetInnerHTML={{
+                  __html: section.content,
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 export default function PrivacyPage() {
   const {
     data: privacyData,
@@ -133,10 +298,11 @@ export default function PrivacyPage() {
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
 
-  // Process the HTML content to add navigation IDs
-  const processedContent = useMemo(() => {
-    if (!privacyData?.privacy_policy?.value) return "";
-    return addNavigationIds(privacyData.privacy_policy.value);
+  // Process the HTML content to add navigation IDs and split into sections
+  const { processedContent, sections, introContent } = useMemo(() => {
+    if (!privacyData?.privacy_policy?.value)
+      return { processedContent: "", sections: [], introContent: "" };
+    return processPrivacyContent(privacyData.privacy_policy.value);
   }, [privacyData?.privacy_policy?.value]);
 
   return (
@@ -197,8 +363,11 @@ export default function PrivacyPage() {
         {/* Main Content */}
         <motion.section variants={itemVariants}>
           <div className="grid lg:grid-cols-12 gap-8">
-            {/* Sidebar - Table of Contents */}
-            <motion.div className="lg:col-span-3" variants={itemVariants}>
+            {/* Desktop Sidebar - Table of Contents (hidden on mobile) */}
+            <motion.div
+              className="hidden lg:block lg:col-span-3"
+              variants={itemVariants}
+            >
               <div className="sticky top-24 bg-white rounded-2xl border border-gray-200/60 shadow-lg p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <FileText className="w-5 h-5 text-[#1D4671]" />
@@ -218,31 +387,7 @@ export default function PrivacyPage() {
                   </div>
                 ) : (
                   <nav className="space-y-2">
-                    {[
-                      {
-                        title: "Interpretation and Definitions",
-                        id: "interpretation",
-                      },
-                      {
-                        title: "Collecting and Using Your Personal Data",
-                        id: "collecting-data",
-                      },
-                      { title: "Use of Your Personal Data", id: "use-data" },
-                      {
-                        title: "Retention of Your Personal Data",
-                        id: "retention",
-                      },
-                      {
-                        title: "Transfer of Your Personal Data",
-                        id: "transfer",
-                      },
-                      {
-                        title: "Security of Your Personal Data",
-                        id: "security",
-                      },
-                      { title: "Children's Privacy", id: "children" },
-                      { title: "Contact Us", id: "contact" },
-                    ].map((section) => (
+                    {sections.map((section) => (
                       <motion.button
                         key={section.id}
                         onClick={() => {
@@ -301,66 +446,134 @@ export default function PrivacyPage() {
                     </p>
                   </motion.div>
                 ) : (
-                  <motion.div
-                    className="p-8 lg:p-12"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                  >
-                    {/* Last Updated Badge */}
-                    <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-blue-200">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                      Last updated: April 14, 2025
-                    </div>
+                  <>
+                    {/* Desktop View - Full Content */}
+                    <motion.div
+                      className="hidden lg:block p-8 lg:p-12"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                      {/* Last Updated Badge */}
+                      <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-blue-200">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        Last updated: April 14, 2025
+                      </div>
 
-                    {/* Content */}
-                    <div
-                      className="prose prose-gray max-w-none
-                        prose-headings:text-gray-900 prose-headings:font-bold
-                        prose-h1:text-3xl prose-h1:mb-6
-                        prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-3
-                        prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-                        prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-2
-                        prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-4
-                        prose-ul:text-gray-600 prose-ul:mb-4
-                        prose-li:mb-2
-                        prose-strong:text-gray-800 prose-strong:font-semibold
-                        prose-a:text-[#1D4671] prose-a:no-underline hover:prose-a:underline
-                        prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm"
-                      dangerouslySetInnerHTML={{
-                        __html: processedContent,
-                      }}
-                    />
-                  </motion.div>
+                      {/* Intro Content */}
+                      {introContent && (
+                        <div
+                          className="prose prose-gray max-w-none mb-8
+                            prose-headings:text-gray-900 prose-headings:font-bold
+                            prose-h1:text-3xl prose-h1:mb-6
+                            prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-4
+                            prose-strong:text-gray-800 prose-strong:font-semibold
+                            prose-a:text-[#1D4671] prose-a:no-underline hover:prose-a:underline"
+                          dangerouslySetInnerHTML={{ __html: introContent }}
+                        />
+                      )}
+
+                      {/* Full Content */}
+                      <div
+                        className="prose prose-gray max-w-none
+                          prose-headings:text-gray-900 prose-headings:font-bold
+                          prose-h1:text-3xl prose-h1:mb-6
+                          prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-3
+                          prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+                          prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-2
+                          prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-4
+                          prose-ul:text-gray-600 prose-ul:mb-4
+                          prose-li:mb-2
+                          prose-strong:text-gray-800 prose-strong:font-semibold
+                          prose-a:text-[#1D4671] prose-a:no-underline hover:prose-a:underline
+                          prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm"
+                        dangerouslySetInnerHTML={{
+                          __html: processedContent,
+                        }}
+                      />
+                    </motion.div>
+
+                    {/* Mobile View - Collapsible Sections */}
+                    <motion.div
+                      className="lg:hidden"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                      {/* Last Updated Badge */}
+                      <div className="p-4 pb-0">
+                        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-full text-xs font-medium border border-blue-200">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                          Last updated: April 14, 2025
+                        </div>
+                      </div>
+
+                      {/* Intro Content */}
+                      {introContent && (
+                        <div className="p-4">
+                          <div
+                            className="prose prose-gray max-w-none
+                              prose-headings:text-gray-900 prose-headings:font-bold
+                              prose-h1:text-2xl prose-h1:mb-4
+                              prose-p:text-gray-600 prose-p:leading-relaxed prose-p:mb-3 prose-p:text-sm
+                              prose-strong:text-gray-800 prose-strong:font-semibold
+                              prose-a:text-[#1D4671] prose-a:no-underline hover:prose-a:underline"
+                            dangerouslySetInnerHTML={{ __html: introContent }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Mobile Help Text */}
+                      <div className="p-4 pt-2">
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+                          <ChevronDown className="w-4 h-4" />
+                          <span>
+                            Tap on sections below to expand and read the content
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Collapsible Sections */}
+                      <div className="divide-y divide-gray-200">
+                        {sections.map((section, index) => (
+                          <CollapsibleSection
+                            key={section.id}
+                            section={section}
+                            index={index}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
                 )}
               </div>
 
               {/* Contact Section */}
               {!isLoading && !isError && (
                 <motion.div
-                  className="mt-8 bg-gradient-to-r from-[#1D4671] to-[#153654] rounded-2xl p-8 text-white"
+                  className="mt-8 bg-gradient-to-r from-[#1D4671] to-[#153654] rounded-2xl p-6 lg:p-8 text-white"
                   variants={itemVariants}
                   whileHover={{ scale: 1.01 }}
                   transition={{ duration: 0.3 }}
                 >
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                        <AlertCircle className="w-6 h-6" />
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <AlertCircle className="w-5 h-5 lg:w-6 lg:h-6" />
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold mb-2">
+                      <h3 className="text-lg lg:text-xl font-semibold mb-2">
                         Questions about your privacy?
                       </h3>
-                      <p className="text-blue-100 mb-4">
+                      <p className="text-blue-100 mb-4 text-sm lg:text-base">
                         If you have any questions about this Privacy Policy or
                         how we handle your data, don't hesitate to reach out to
                         us.
                       </p>
                       <a
                         href="mailto:info@daleelfm.com"
-                        className="inline-flex items-center gap-2 bg-white text-[#1D4671] px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors duration-200"
+                        className="inline-flex items-center gap-2 bg-white text-[#1D4671] px-4 py-2 lg:px-6 lg:py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors duration-200 text-sm lg:text-base"
                       >
                         Contact Us
                         <svg

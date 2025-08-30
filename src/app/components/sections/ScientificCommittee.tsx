@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "../common/SectionHeader";
 import { Button } from "../common/Button";
-import dynamic from "next/dynamic";
+import Image from "next/image";
 
 // Type definitions
 interface ScientificCommitteeMember {
@@ -20,14 +20,6 @@ interface ScientificCommitteeData {
 interface ScientificCommitteeProps {
   scientificCommittee: ScientificCommitteeData[];
 }
-
-// Dynamic import for Image to avoid SSR issues
-const Image = dynamic(() => import("next/image"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
-  ),
-});
 
 const VISIBLE = 5; // Number of cards visible at once
 
@@ -79,10 +71,12 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
   };
 
   const handleImageLoad = (memberName: string) => {
+    console.log(`Image loaded for: ${memberName}`);
     setImageLoadStates((prev) => ({ ...prev, [memberName]: "loaded" }));
   };
 
-  const handleImageError = (memberName: string) => {
+  const handleImageError = (memberName: string, imageUrl: string) => {
+    console.error(`Image failed to load for: ${memberName}, URL: ${imageUrl}`);
     setImageLoadStates((prev) => ({ ...prev, [memberName]: "error" }));
   };
 
@@ -121,6 +115,7 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
     const imageState = imageLoadStates[member.name];
     const size = isActive ? 96 : 64;
 
+    // Always show fallback if no image URL or if image failed to load
     if (!member.image || imageState === "error") {
       return (
         <div className="w-full h-full bg-[#B5E2DD] flex items-center justify-center text-white font-bold text-lg rounded-full">
@@ -129,12 +124,27 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
       );
     }
 
+    // Show loading state
     if (imageState === "loading") {
       return (
-        <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
+        <>
+          <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
+          {/* Hidden image for loading */}
+          <Image
+            src={member.image}
+            alt={member.name}
+            width={size}
+            height={size}
+            className="hidden"
+            onLoad={() => handleImageLoad(member.name)}
+            onError={() => handleImageError(member.name, member.image)}
+            unoptimized={true} // Disable Next.js optimization for external URLs
+          />
+        </>
       );
     }
 
+    // Show loaded image
     return (
       <Image
         src={member.image}
@@ -143,8 +153,9 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
         height={size}
         className="w-full h-full object-cover rounded-full"
         onLoad={() => handleImageLoad(member.name)}
-        onError={() => handleImageError(member.name)}
+        onError={() => handleImageError(member.name, member.image)}
         priority={isActive}
+        unoptimized={true}
       />
     );
   };
@@ -245,7 +256,7 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
       </div>
 
       {/* Dots Navigation */}
-      <div className="flex justify-center gap-1 mt-6">
+      {/* <div className="flex justify-center gap-1 mt-6">
         {members.map((_, idx) => (
           <button
             key={`dot-${idx}`}
@@ -257,7 +268,7 @@ const ScientificCommittee: React.FC<ScientificCommitteeProps> = ({
             type="button"
           />
         ))}
-      </div>
+      </div> */}
 
       <div className="flex justify-center mt-8">
         <Button

@@ -147,7 +147,7 @@ const Hero = () => {
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 items-center"
           >
             <motion.a
-              href="https://play.google.com/store"
+              href="https://play.google.com/store/apps/details?id=com.app.DalelApp"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05, y: -2 }}
@@ -163,7 +163,7 @@ const Hero = () => {
               />
             </motion.a>
             <motion.a
-              href="https://apps.apple.com/"
+              href="https://apps.apple.com/sa/app/daleel-fm/id6743419756"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05, y: -2 }}
