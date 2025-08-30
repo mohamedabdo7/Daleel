@@ -141,7 +141,7 @@ export const CreateExamForm: React.FC = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">
+        <CardTitle className="text-2xl  font-bold text-center">
           Create Exam
         </CardTitle>
       </CardHeader>

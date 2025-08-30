@@ -5,7 +5,12 @@ import {
   downloadFile,
   generateSafeFileName,
   getFileExtension,
-} from "@/lib/utils/download";
+} from "@/lib/utils";
+// import {
+//   downloadFile,
+//   generateSafeFileName,
+//   getFileExtension,
+// } from "@/lib/utils/download";
 
 interface AlertCardProps {
   alert: Alert;

@@ -15,12 +15,17 @@ import {
 } from "lucide-react";
 import { getAlertBySlug, type Alert } from "@/lib/api/articles-alerts.service";
 import { qk } from "@/lib/queryKeys";
+// import {
+//   downloadFile,
+//   generateSafeFileName,
+//   getFileExtension,
+// } from "@/lib/utils/download";
+import { Button } from "@/app/components/common/Button";
 import {
   downloadFile,
   generateSafeFileName,
   getFileExtension,
-} from "@/lib/utils/download";
-import { Button } from "@/app/components/common/Button";
+} from "@/lib/utils";
 
 export default function AlertDetailPage() {
   const { slug } = useParams<{ slug: string }>();

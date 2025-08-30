@@ -36,9 +36,9 @@ export default function CreateExamPage() {
       <Toaster position="top-right" richColors closeButton duration={4000} />
 
       {/* React Query Devtools - only in development */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      )} */}
     </QueryClientProvider>
   );
 }

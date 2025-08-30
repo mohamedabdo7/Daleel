@@ -320,6 +320,7 @@ const Navbar = () => {
                             {/* Account Button */}
                             <motion.button
                               onClick={() => {
+                                router.push("/en/profile");
                                 setIsUserDropdownOpen(false);
                                 // Navigate to profile
                               }}
