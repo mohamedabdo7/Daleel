@@ -22,7 +22,7 @@ export const ROUTES = {
   URGENT_CARE_MANUAL: "/protocols/urgent-care-manual",
   PHC_ANTIMICROBIAL_MANUAL: "/protocols/phc-antimicrobial-manual",
   ABOUT_US: "/about-us",
-  VOLUNTEERS_AUTHORS: "/volunteers-authors",
+  VOLUNTEERS_AUTHORS: "/volunteers",
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

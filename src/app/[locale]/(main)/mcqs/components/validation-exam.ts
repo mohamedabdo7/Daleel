@@ -21,7 +21,7 @@ export const createExamSchema = z
       .min(1, "Must have at least 1 question")
       .int("Must be a whole number"),
 
-    time_mode: z.enum(["timed_1min", "timed_90sec", "untimed"] as const, {
+    time_mode: z.enum(["timed", "timed90", "untimed"] as const, {
       required_error: "Time mode is required",
     }),
 

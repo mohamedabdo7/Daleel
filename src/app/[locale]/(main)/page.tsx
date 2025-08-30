@@ -4,13 +4,17 @@ import CommitteeSection from "@/app/components/sections/CommitteeSection";
 import ContactSection from "@/app/components/sections/ContactUs";
 import DaleelBooks from "@/app/components/sections/DaleelBooks";
 import DaleelSections from "@/app/components/sections/DaleelSections";
-import EssentialBookCommittee from "@/app/components/sections/EssentialBookCommittee";
+import EssentialBookCommittee, {
+  CommitteeMember,
+} from "@/app/components/sections/EssentialBookCommittee";
 import FounderSection from "@/app/components/sections/FounderSection";
 import Hero from "@/app/components/sections/Hero";
 import MarqueeSection from "@/app/components/sections/Marquee";
-import LatestNewsSection from "@/app/components/sections/News";
+import LatestNewsSection, { NewsItem } from "@/app/components/sections/News";
 import ScientificCommittee from "@/app/components/sections/ScientificCommittee";
-import TestimonialSection from "@/app/components/sections/TestimonialSection";
+import TestimonialSection, {
+  Review,
+} from "@/app/components/sections/TestimonialSection";
 import { api } from "@/lib/api/client";
 import React, { useEffect, useState } from "react";
 
@@ -28,12 +32,10 @@ interface ScientificCommitteeData {
 
 interface ApiResponse {
   data: {
+    scientific_team: CommitteeMember[];
     scientific_committee: ScientificCommitteeData[];
-    // Add other section types here as you implement them
-    // founder_section?: any[];
-    // daleel_books?: any[];
-    // testimonials?: any[];
-    // etc...
+    latest_news: NewsItem[];
+    reviews: Review[];
   };
 }
 
@@ -47,10 +49,10 @@ const Page = () => {
       try {
         setLoading(true);
         const response = await api.fetch<ApiResponse>("/user/home_pluck_apis"); // Adjust endpoint
+
         setData(response);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch data");
-        console.error("Error fetching homepage data:", err);
       } finally {
         setLoading(false);
       }
@@ -94,50 +96,17 @@ const Page = () => {
       <DaleelBooks />
       <FounderSection />
       <CommitteeSection />
-      <EssentialBookCommittee />
+      <EssentialBookCommittee
+        essentialBookCommittee={data?.data?.scientific_team || []}
+      />
       <ScientificCommittee
         scientificCommittee={data?.data?.scientific_committee || []}
       />
-      <LatestNewsSection />
-      <TestimonialSection />
+      <LatestNewsSection latestNews={data?.data?.latest_news || []} />{" "}
+      <TestimonialSection reviews={data?.data?.reviews || []} />
       <ContactSection />
     </div>
   );
 };
 
 export default Page;
-
-// import CommitteeSection from "@/app/components/sections/CommitteeSection";
-// import ContactSection from "@/app/components/sections/ContactUs";
-// import DaleelBooks from "@/app/components/sections/DaleelBooks";
-// import DaleelSections from "@/app/components/sections/DaleelSections";
-// import EssentialBookCommittee from "@/app/components/sections/EssentialBookCommittee";
-// import FounderSection from "@/app/components/sections/FounderSection";
-// import Hero from "@/app/components/sections/Hero";
-// import MarqueeSection from "@/app/components/sections/Marquee";
-// import LatestNewsSection from "@/app/components/sections/News";
-// import ScientificCommittee from "@/app/components/sections/ScientificCommittee";
-// import TestimonialSection from "@/app/components/sections/TestimonialSection";
-// import React from "react";
-
-// const page = () => {
-//   return (
-//     <>
-//       <div className="min-h-screen relative overflow-hidden">
-//         <Hero />
-//         <MarqueeSection />
-//         <DaleelSections />
-//         <DaleelBooks />
-//         <FounderSection />
-//         <CommitteeSection />
-//         <EssentialBookCommittee />
-//         <ScientificCommittee />
-//         <LatestNewsSection />
-//         <TestimonialSection />
-//         <ContactSection />
-//       </div>
-//     </>
-//   );
-// };
-
-// export default page;

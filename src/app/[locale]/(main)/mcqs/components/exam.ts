@@ -50,8 +50,8 @@ export const EXAM_MODE_OPTIONS = [
 ];
 
 export const TIME_MODE_OPTIONS = [
-  { value: "timed_1min" as const, label: "Timed (1 min per question)" },
-  { value: "timed_90sec" as const, label: "Timed (90 sec per question)" },
+  { value: "timed" as const, label: "Timed (1 min per question)" },
+  { value: "timed90" as const, label: "Timed (90 sec per question)" },
   { value: "untimed" as const, label: "Untimed" },
 ];
 

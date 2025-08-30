@@ -1,55 +1,159 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "../common/SectionHeader";
+import { Button } from "../common/Button";
+import Image from "next/image";
 
-const members = [
-  { name: "Dr. Doctor Name1", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name2", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name3", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name4", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name", title: "Doctor title Doctor title" },
-  { name: "Dr. Doctor Name", title: "Doctor title Doctor title" },
-];
+// Type definitions
+export interface CommitteeMember {
+  id: number;
+  uuid: string;
+  name: string;
+  position: string;
+  image: string;
+}
+
+interface EssentialBookCommitteeProps {
+  essentialBookCommittee: CommitteeMember[];
+}
 
 const VISIBLE = 5; // Number of cards visible at once
 
-const EssentialBookCommittee = () => {
-  const [activeIndex, setActiveIndex] = useState(2); // Start with middle card active
+const EssentialBookCommittee: React.FC<EssentialBookCommitteeProps> = ({
+  essentialBookCommittee,
+}) => {
+  const [activeIndex, setActiveIndex] = useState(2);
+  const [isClient, setIsClient] = useState(false);
+  const [imageLoadStates, setImageLoadStates] = useState<
+    Record<string, "loading" | "loaded" | "error">
+  >({});
+
+  // Ensure client-side rendering and initialize image states
+  useEffect(() => {
+    setIsClient(true);
+    const initialStates: Record<string, "loading" | "loaded" | "error"> = {};
+    essentialBookCommittee.forEach((member) => {
+      initialStates[member.name] = "loading";
+    });
+    setImageLoadStates(initialStates);
+  }, [essentialBookCommittee]);
+
+  if (!isClient || essentialBookCommittee.length === 0) {
+    return (
+      <section className="w-full bg-white py-10 px-2 md:px-0">
+        <div className="flex justify-center">
+          <div className="animate-pulse bg-gray-200 h-8 w-64 rounded"></div>
+        </div>
+      </section>
+    );
+  }
+
+  const validActiveIndex = Math.min(
+    Math.max(0, activeIndex),
+    essentialBookCommittee.length - 1
+  );
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev > 0 ? prev - 1 : members.length - 1));
+    setActiveIndex((prev) =>
+      prev > 0 ? prev - 1 : essentialBookCommittee.length - 1
+    );
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev < members.length - 1 ? prev + 1 : 0));
+    setActiveIndex((prev) =>
+      prev < essentialBookCommittee.length - 1 ? prev + 1 : 0
+    );
   };
 
-  // Calculate visible cards around the active card
+  const handleImageLoad = (memberName: string) => {
+    console.log(`Image loaded successfully for: ${memberName}`);
+    setImageLoadStates((prev) => ({ ...prev, [memberName]: "loaded" }));
+  };
+
+  const handleImageError = (memberName: string, imageUrl: string) => {
+    console.error(`Image failed to load for ${memberName}. URL: ${imageUrl}`);
+    setImageLoadStates((prev) => ({ ...prev, [memberName]: "error" }));
+  };
+
   const getVisibleCards = () => {
     const cards = [];
     const halfVisible = Math.floor(VISIBLE / 2);
 
     for (let i = -halfVisible; i <= halfVisible; i++) {
-      let index = activeIndex + i;
-
-      // Handle wrapping for infinite scroll effect
-      if (index < 0) index = members.length + index;
-      if (index >= members.length) index = index - members.length;
+      let index = validActiveIndex + i;
+      if (index < 0) index = essentialBookCommittee.length + index;
+      if (index >= essentialBookCommittee.length)
+        index = index - essentialBookCommittee.length;
 
       cards.push({
-        member: members[index],
+        member: essentialBookCommittee[index],
         originalIndex: index,
         position: i,
         isActive: i === 0,
       });
     }
-
     return cards;
   };
 
   const visibleCards = getVisibleCards();
+
+  const MemberImage = ({
+    member,
+    isActive,
+  }: {
+    member: CommitteeMember;
+    isActive: boolean;
+  }) => {
+    const imageState = imageLoadStates[member.name];
+    const size = isActive ? 96 : 64;
+
+    // Validate image URL
+    const isValidImageUrl = member.image && member.image.startsWith("http");
+
+    if (!isValidImageUrl || imageState === "error") {
+      console.warn(
+        `Using fallback for ${member.name} due to invalid/missing image`
+      );
+      return (
+        <div className="w-full h-full bg-[#B5E2DD] flex items-center justify-center text-white font-bold text-lg rounded-full">
+          {member.name.charAt(0).toUpperCase()}
+        </div>
+      );
+    }
+
+    if (imageState === "loading") {
+      return (
+        <>
+          <div className="w-full h-full bg-[#B5E2DD] animate-pulse rounded-full" />
+          <Image
+            src={member.image}
+            alt={member.name}
+            width={size}
+            height={size}
+            className="hidden"
+            onLoadingComplete={() => handleImageLoad(member.name)}
+            onError={() => handleImageError(member.name, member.image)}
+            unoptimized={true}
+          />
+        </>
+      );
+    }
+
+    return (
+      <Image
+        src={member.image}
+        alt={member.name}
+        width={size}
+        height={size}
+        className="w-full h-full object-cover rounded-full"
+        onLoadingComplete={() => handleImageLoad(member.name)}
+        onError={() => handleImageError(member.name, member.image)}
+        priority={isActive}
+        unoptimized={true} // Allow external URLs without Next.js optimization
+      />
+    );
+  };
 
   return (
     <section className="w-full bg-white py-10 px-2 md:px-0">
@@ -63,32 +167,29 @@ const EssentialBookCommittee = () => {
         <div className="flex items-center justify-center">
           {visibleCards.map((card, idx) => {
             const { member, position, isActive } = card;
-
-            // Determine spacing - more space around active card
             let marginClass = "";
-            if (position === -1) marginClass = "mr-12"; // Left adjacent card
-            else if (position === 1)
-              marginClass = "ml-12"; // Right adjacent card
-            else if (position === -2) marginClass = "mr-4"; // Far left card
-            else if (position === 2) marginClass = "ml-4"; // Far right card
-            else if (position === 0) marginClass = "mx-8"; // Active card
+            if (position === -1) marginClass = "mr-12";
+            else if (position === 1) marginClass = "ml-12";
+            else if (position === -2) marginClass = "mr-4";
+            else if (position === 2) marginClass = "ml-4";
+            else if (position === 0) marginClass = "mx-8";
 
             return (
               <div
-                key={idx}
+                key={`${member.name}-${position}-${validActiveIndex}`}
                 className={`relative flex items-center ${marginClass}`}
               >
-                {/* Left Arrow - shows only for the card immediately left of active */}
                 {position === -1 && (
                   <button
                     className="absolute -right-12 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                     onClick={handlePrev}
+                    aria-label="Previous member"
+                    type="button"
                   >
                     <ChevronLeft size={16} />
                   </button>
                 )}
 
-                {/* Card */}
                 <div
                   className={`flex flex-col items-center justify-center rounded-2xl transition-all duration-300 ${
                     isActive
@@ -97,10 +198,13 @@ const EssentialBookCommittee = () => {
                   }`}
                 >
                   <div
-                    className={`flex items-center justify-center rounded-full bg-[#B5E2DD] mb-4 ${
+                    className={`flex items-center justify-center rounded-full bg-[#B5E2DD] mb-4 overflow-hidden ${
                       isActive ? "w-24 h-24" : "w-16 h-16"
                     }`}
-                  />
+                  >
+                    <MemberImage member={member} isActive={isActive} />
+                  </div>
+
                   <div
                     className={`text-center font-bold ${
                       isActive
@@ -110,22 +214,24 @@ const EssentialBookCommittee = () => {
                   >
                     {member.name}
                   </div>
-                  <div
+
+                  {/* <div
                     className={`text-center mt-1 px-2 ${
                       isActive
                         ? "text-[#009688] text-sm md:text-base font-semibold"
                         : "text-[#009688] text-xs"
                     }`}
                   >
-                    {member.title}
-                  </div>
+                    {member.position}
+                  </div> */}
                 </div>
 
-                {/* Right Arrow - shows only for the card immediately right of active */}
                 {position === 1 && (
                   <button
                     className="absolute -left-12 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-colors"
                     onClick={handleNext}
+                    aria-label="Next member"
+                    type="button"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -136,18 +242,27 @@ const EssentialBookCommittee = () => {
         </div>
       </div>
 
-      {/* Dots Navigation */}
-      <div className="flex justify-center gap-1 mt-6">
-        {members.map((_, idx) => (
+      {/* <div className="flex justify-center gap-1 mt-6">
+        {essentialBookCommittee.map((_, idx) => (
           <button
-            key={idx}
+            key={`dot-${idx}`}
             className={`w-2 h-2 rounded-full transition-all duration-200 ${
-              idx === activeIndex ? "bg-[#1976D2]" : "bg-[#C7E2F6]"
+              idx === validActiveIndex ? "bg-[#1976D2]" : "bg-[#C7E2F6]"
             }`}
             onClick={() => setActiveIndex(idx)}
             aria-label={`Go to slide ${idx + 1}`}
+            type="button"
           />
         ))}
+      </div> */}
+
+      <div className="flex justify-center mt-8">
+        <Button
+          className="text-white rounded-full px-8 py-3 text-base font-normal shadow-none hover:brightness-110"
+          size="lg"
+        >
+          Full Essential Book Committee
+        </Button>
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "sonner";
-import { CreateExamForm } from "../components/CreateExamForm";
+import { CreateExamForm } from "../../mcqs/components/CreateExamForm";
 
 // Create a client outside the component to avoid recreating it on every render
 const queryClient = new QueryClient({
