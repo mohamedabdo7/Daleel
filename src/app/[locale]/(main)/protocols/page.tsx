@@ -246,7 +246,7 @@ export default function ProtocolsPage() {
         <main className="flex-1 min-w-0">
           <div className="p-4 lg:p-8">
             {/* Mobile Search */}
-            <div className="md:hidden mb-4">
+            {/* <div className="md:hidden mb-4">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -270,7 +270,7 @@ export default function ProtocolsPage() {
                   </Button>
                 </div>
               </form>
-            </div>
+            </div> */}
 
             {catsLoading ? (
               <div className="max-w-5xl mx-auto">
