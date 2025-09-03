@@ -35,7 +35,7 @@ export default function EssentialsPage() {
   const selectedSection = searchParams.get("sec") || undefined;
   const selectedChapter = searchParams.get("ch") || undefined;
   const selectedLesson = searchParams.get("ls") || undefined;
-  const readMode = (searchParams.get("mode") as ReadMode) || "lesson";
+  const readMode = (searchParams.get("mode") as ReadMode) || "chapter";
 
   const {
     data: sections,
@@ -592,11 +592,11 @@ export default function EssentialsPage() {
                 onValueChange={(value) => handleModeChange(value as ReadMode)}
               >
                 <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
-                  <TabsTrigger value="lesson" className="text-sm">
-                    Read by Lesson
-                  </TabsTrigger>
                   <TabsTrigger value="chapter" className="text-sm">
                     Read by Chapter
+                  </TabsTrigger>
+                  <TabsTrigger value="lesson" className="text-sm">
+                    Read by Lesson
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
@@ -618,6 +618,7 @@ export default function EssentialsPage() {
 // import { Menu, FileText, Loader2, Search } from "lucide-react";
 // import EmptyState from "./components/EmptyState";
 // import EssentialsContent from "./components/EssentialsContent";
+// import EssentialsChapterContent from "./components/EssentialsChapterContent";
 // import {
 //   esGetChapters,
 //   esGetLessons,
@@ -628,10 +629,14 @@ export default function EssentialsPage() {
 // import PageHeader from "@/app/components/common/PageHeader";
 // import { Button } from "@/components/ui/button";
 // import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import DeepSidebar, {
 //   DeepSidebarConfig,
 //   DeepSidebarItem,
 // } from "../flow/SidebarTreeDeep";
+// import GenericSidebar, { SidebarConfig, SidebarItem } from "./../flow/sidebar";
+
+// type ReadMode = "lesson" | "chapter";
 
 // export default function EssentialsPage() {
 //   const router = useRouter();
@@ -642,6 +647,7 @@ export default function EssentialsPage() {
 //   const selectedSection = searchParams.get("sec") || undefined;
 //   const selectedChapter = searchParams.get("ch") || undefined;
 //   const selectedLesson = searchParams.get("ls") || undefined;
+//   const readMode = (searchParams.get("mode") as ReadMode) || "lesson";
 
 //   const {
 //     data: sections,
@@ -653,7 +659,8 @@ export default function EssentialsPage() {
 //     staleTime: 5 * 60_000,
 //   });
 
-//   const initialItems = useMemo<DeepSidebarItem[]>(
+//   // Deep sidebar items for lesson mode
+//   const initialDeepItems = useMemo<DeepSidebarItem[]>(
 //     () =>
 //       (sections || []).map((s: any) => ({
 //         id: s.slug,
@@ -664,26 +671,56 @@ export default function EssentialsPage() {
 //     [sections]
 //   );
 
-//   const [items, setItems] = useState<DeepSidebarItem[]>(initialItems);
+//   // Generic sidebar items for chapter mode
+//   const initialGenericItems = useMemo<SidebarItem[]>(
+//     () =>
+//       (sections || []).map((s: any) => ({
+//         id: s.slug,
+//         title: s.title,
+//         icon: FileText,
+//       })),
+//     [sections]
+//   );
+
+//   const [deepItems, setDeepItems] =
+//     useState<DeepSidebarItem[]>(initialDeepItems);
+//   const [genericItems, setGenericItems] =
+//     useState<SidebarItem[]>(initialGenericItems);
 //   const [loadingNodeId, setLoadingNodeId] = useState<string | null>(null);
 //   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 //   const [initialExpandedIds, setInitialExpandedIds] = useState<
 //     string[] | undefined
 //   >(undefined);
+//   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+//     new Set()
+//   );
 
-//   // Sidebar configuration
-//   const sidebarConfig: DeepSidebarConfig = {
+//   // Sidebar configurations
+//   const deepSidebarConfig: DeepSidebarConfig = {
 //     title: "The Essentials",
-//     subtitle: "Browse comprehensive family medicine essentials",
+//     subtitle: "Browse by lessons",
 //     defaultIcon: FileText,
 //     loadingText: "Loading content...",
 //     emptyText: "No sections available",
 //     className: "h-full",
 //   };
 
+//   const genericSidebarConfig: SidebarConfig = {
+//     title: "The Essentials",
+//     subtitle: "Browse by chapters",
+//     defaultIcon: FileText,
+//     loadingText: "Loading chapters...",
+//     emptyText: "No sections available",
+//     className: "h-full",
+//   };
+
 //   useEffect(() => {
-//     setItems(initialItems);
-//   }, [initialItems]);
+//     setDeepItems(initialDeepItems);
+//   }, [initialDeepItems]);
+
+//   useEffect(() => {
+//     setGenericItems(initialGenericItems);
+//   }, [initialGenericItems]);
 
 //   const updateQuery = (params: Record<string, string | undefined>) => {
 //     const sp = new URLSearchParams(searchParams.toString());
@@ -694,6 +731,16 @@ export default function EssentialsPage() {
 //     router.replace(`${pathname}?${sp.toString()}`);
 //   };
 
+//   const handleModeChange = (newMode: ReadMode) => {
+//     updateQuery({
+//       mode: newMode,
+//       sec: undefined,
+//       ch: undefined,
+//       ls: undefined,
+//     });
+//   };
+
+//   // Helper to update children for deep sidebar
 //   const setNodeChildren = (
 //     arr: DeepSidebarItem[],
 //     id: string,
@@ -707,20 +754,32 @@ export default function EssentialsPage() {
 //     });
 //   };
 
-//   // Handle search
-//   const handleSearch = (query: string) => {
-//     console.log("Search query:", query);
-//     // Implement search logic here
+//   // Helper to update children for generic sidebar
+//   const setGenericNodeChildren = (
+//     arr: SidebarItem[],
+//     id: string,
+//     children: SidebarItem[]
+//   ): SidebarItem[] => {
+//     return arr.map((n) => {
+//       if (n.id === id) return { ...n, children };
+//       if (n.children)
+//         return {
+//           ...n,
+//           children: setGenericNodeChildren(n.children, id, children),
+//         };
+//       return n;
+//     });
 //   };
 
-//   // Auto-build the path from URL (sec → ch → ls) and expand parents
+//   // Auto-load & expand path for lesson mode
 //   useEffect(() => {
+//     if (readMode !== "lesson") return;
+
 //     (async () => {
 //       if (!sections || !sections.length) return;
 //       if (!selectedSection) return;
 
-//       // ensure chapters
-//       let nextItems = items;
+//       let nextItems = deepItems;
 //       const sectionNode = nextItems.find((n) => n.id === selectedSection);
 //       if (sectionNode && !sectionNode.children) {
 //         setLoadingNodeId(selectedSection);
@@ -743,11 +802,10 @@ export default function EssentialsPage() {
 //           selectedSection,
 //           chapterChildren
 //         );
-//         setItems(nextItems);
+//         setDeepItems(nextItems);
 //         setLoadingNodeId(null);
 //       }
 
-//       // ensure lessons
 //       if (selectedChapter) {
 //         const chapterNode = nextItems
 //           .find((n) => n.id === selectedSection)
@@ -775,7 +833,7 @@ export default function EssentialsPage() {
 //             selectedChapter,
 //             lessonChildren
 //           );
-//           setItems(nextItems);
+//           setDeepItems(nextItems);
 //           setLoadingNodeId(null);
 //         }
 //       }
@@ -785,11 +843,19 @@ export default function EssentialsPage() {
 //       if (selectedChapter) expanded.push(selectedChapter);
 //       setInitialExpandedIds(expanded);
 //     })();
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [sections?.length, selectedSection, selectedChapter]);
+//   }, [
+//     sections?.length,
+//     selectedSection,
+//     selectedChapter,
+//     readMode,
+//     deepItems,
+//     queryClient,
+//   ]);
 
-//   const onToggle = async (item: DeepSidebarItem, willExpand: boolean) => {
+//   // Handle deep sidebar toggle (lesson mode)
+//   const onDeepToggle = async (item: DeepSidebarItem, willExpand: boolean) => {
 //     if (!willExpand) return;
+
 //     const already = (() => {
 //       const find = (arr: DeepSidebarItem[]): DeepSidebarItem | undefined => {
 //         for (const n of arr) {
@@ -800,7 +866,7 @@ export default function EssentialsPage() {
 //           }
 //         }
 //       };
-//       return find(items)?.children;
+//       return find(deepItems)?.children;
 //     })();
 //     if (already && already.length) return;
 
@@ -821,7 +887,7 @@ export default function EssentialsPage() {
 //             chapterSlug: c.slug,
 //           },
 //         }));
-//         setItems((prev) => setNodeChildren(prev, item.id, children));
+//         setDeepItems((prev) => setNodeChildren(prev, item.id, children));
 //       } else if (item.meta?.type === "chapter") {
 //         const list = await queryClient.fetchQuery({
 //           queryKey: qk.essentials.lessons(
@@ -842,16 +908,58 @@ export default function EssentialsPage() {
 //             lessonSlug: l.slug,
 //           },
 //         }));
-//         setItems((prev) => setNodeChildren(prev, item.id, children));
+//         setDeepItems((prev) => setNodeChildren(prev, item.id, children));
 //       }
 //     } finally {
 //       setLoadingNodeId(null);
 //     }
 //   };
 
-//   const onLeafClick = (item: DeepSidebarItem) => {
+//   // Handle generic sidebar category toggle (chapter mode)
+//   const onCategoryToggle = async (
+//     categorySlug: string,
+//     willExpand: boolean
+//   ) => {
+//     if (willExpand) {
+//       setExpandedCategories((prev) => new Set([...prev, categorySlug]));
+
+//       // Load chapters if not already loaded
+//       const categoryNode = genericItems.find(
+//         (item) => item.id === categorySlug
+//       );
+//       if (categoryNode && !categoryNode.children) {
+//         setLoadingNodeId(categorySlug);
+//         try {
+//           const chapters = await queryClient.fetchQuery({
+//             queryKey: qk.essentials.chapters(categorySlug),
+//             queryFn: ({ signal }) => esGetChapters(categorySlug, signal),
+//             staleTime: 120_000,
+//           });
+//           const chapterChildren = (chapters || []).map((c: any) => ({
+//             id: c.slug,
+//             title: c.title,
+//           }));
+//           setGenericItems((prev) =>
+//             setGenericNodeChildren(prev, categorySlug, chapterChildren)
+//           );
+//         } finally {
+//           setLoadingNodeId(null);
+//         }
+//       }
+//     } else {
+//       setExpandedCategories((prev) => {
+//         const next = new Set(prev);
+//         next.delete(categorySlug);
+//         return next;
+//       });
+//     }
+//   };
+
+//   // Handle deep sidebar leaf click (lesson mode)
+//   const onDeepLeafClick = (item: DeepSidebarItem) => {
 //     if (item.meta?.type !== "lesson") return;
 //     updateQuery({
+//       mode: "lesson",
 //       sec: item.meta.sectionSlug,
 //       ch: item.meta.chapterSlug,
 //       ls: item.meta.lessonSlug,
@@ -859,14 +967,202 @@ export default function EssentialsPage() {
 //     setIsMobileSidebarOpen(false);
 //   };
 
+//   // Handle generic sidebar item click (chapter mode)
+//   const onGenericItemClick = (item: SidebarItem) => {
+//     // Find the parent section
+//     const parentSection = genericItems.find((section) =>
+//       section.children?.some((child) => child.id === item.id)
+//     );
+
+//     if (parentSection) {
+//       // This is a chapter click
+//       updateQuery({
+//         mode: "chapter",
+//         sec: parentSection.id,
+//         ch: item.id,
+//         ls: undefined,
+//       });
+//     }
+//     setIsMobileSidebarOpen(false);
+//   };
+
 //   // Close mobile sidebar on route change
 //   useEffect(() => {
 //     setIsMobileSidebarOpen(false);
-//   }, [selectedLesson]);
+//   }, [selectedLesson, selectedChapter]);
+
+//   const renderSidebar = () => {
+//     if (secLoading) {
+//       return (
+//         <div className="h-full bg-white border-r border-gray-200 flex items-center justify-center">
+//           <div className="flex items-center gap-2">
+//             <Loader2 className="h-5 w-5 animate-spin" />
+//             <span className="text-sm text-gray-600">Loading content...</span>
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (secError) {
+//       return (
+//         <div className="h-full bg-white border-r border-gray-200 flex items-center justify-center p-4">
+//           <div className="text-center text-sm text-red-600">
+//             Failed to load sections.
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (readMode === "lesson") {
+//       return (
+//         <DeepSidebar
+//           items={deepItems}
+//           onLeafClick={onDeepLeafClick}
+//           activeLeafId={selectedLesson}
+//           config={deepSidebarConfig}
+//           isOpen={true}
+//           onClose={() => {}}
+//           onToggle={onDeepToggle}
+//           loadingNodeId={loadingNodeId}
+//           initialExpandedIds={initialExpandedIds}
+//         />
+//       );
+//     } else {
+//       return (
+//         <GenericSidebar
+//           items={genericItems}
+//           selectedItemId={selectedChapter}
+//           onItemClick={onGenericItemClick}
+//           onCategoryToggle={onCategoryToggle}
+//           loadingCategoryId={loadingNodeId}
+//           expandedCategories={expandedCategories}
+//           config={genericSidebarConfig}
+//           isOpen={true}
+//           onClose={() => {}}
+//         />
+//       );
+//     }
+//   };
+
+//   const renderMobileSidebar = () => {
+//     if (secLoading) {
+//       return (
+//         <div className="h-full flex items-center justify-center">
+//           <div className="flex items-center gap-2">
+//             <Loader2 className="h-5 w-5 animate-spin" />
+//             <span className="text-sm text-gray-600">Loading content...</span>
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (secError) {
+//       return (
+//         <div className="h-full flex items-center justify-center p-4">
+//           <div className="text-center text-sm text-red-600">
+//             Failed to load sections.
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (readMode === "lesson") {
+//       return (
+//         <DeepSidebar
+//           items={deepItems}
+//           onLeafClick={onDeepLeafClick}
+//           activeLeafId={selectedLesson}
+//           config={deepSidebarConfig}
+//           isOpen={isMobileSidebarOpen}
+//           onClose={() => setIsMobileSidebarOpen(false)}
+//           onToggle={onDeepToggle}
+//           loadingNodeId={loadingNodeId}
+//           initialExpandedIds={initialExpandedIds}
+//         />
+//       );
+//     } else {
+//       return (
+//         <GenericSidebar
+//           items={genericItems}
+//           selectedItemId={selectedChapter}
+//           onItemClick={onGenericItemClick}
+//           onCategoryToggle={onCategoryToggle}
+//           loadingCategoryId={loadingNodeId}
+//           expandedCategories={expandedCategories}
+//           config={genericSidebarConfig}
+//           isOpen={isMobileSidebarOpen}
+//           onClose={() => setIsMobileSidebarOpen(false)}
+//         />
+//       );
+//     }
+//   };
+
+//   const renderMainContent = () => {
+//     if (secLoading) {
+//       return (
+//         <div className="max-w-5xl mx-auto">
+//           <div className="bg-white rounded-2xl border shadow-sm p-6 animate-pulse">
+//             <div className="h-6 w-48 bg-gray-200 rounded mb-4" />
+//             <div className="h-4 w-full bg-gray-200 rounded mb-2" />
+//             <div className="h-4 w-11/12 bg-gray-200 rounded" />
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (secError) {
+//       return (
+//         <div className="max-w-5xl mx-auto">
+//           <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6">
+//             Failed to load sections.
+//           </div>
+//         </div>
+//       );
+//     }
+
+//     if (readMode === "lesson") {
+//       if (!(selectedSection && selectedChapter && selectedLesson)) {
+//         return <EmptyState />;
+//       }
+//       return (
+//         <div className="max-w-5xl mx-auto">
+//           <EssentialsContent
+//             sectionSlug={selectedSection}
+//             chapterSlug={selectedChapter}
+//             lessonSlug={selectedLesson}
+//           />
+//         </div>
+//       );
+//     } else {
+//       if (!(selectedSection && selectedChapter)) {
+//         return (
+//           <div className="max-w-5xl mx-auto">
+//             <div className="bg-white rounded-3xl shadow-xl border border-gray-200/60 p-8 text-center">
+//               <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+//               <h2 className="text-xl font-semibold text-gray-700 mb-2">
+//                 Select a Chapter
+//               </h2>
+//               <p className="text-gray-600">
+//                 Choose a section and chapter from the sidebar to view all
+//                 lessons in that chapter.
+//               </p>
+//             </div>
+//           </div>
+//         );
+//       }
+//       return (
+//         <div className="max-w-5xl mx-auto">
+//           <EssentialsChapterContent
+//             sectionSlug={selectedSection}
+//             chapterSlug={selectedChapter}
+//           />
+//         </div>
+//       );
+//     }
+//   };
 
 //   return (
 //     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-//       {/* Page Header */}
 //       <PageHeader
 //         title="The Essentials"
 //         description="Browse comprehensive family medicine essentials"
@@ -876,38 +1172,10 @@ export default function EssentialsPage() {
 //         onSearch={() => {}}
 //       />
 
-//       {/* Main Content Layout */}
 //       <div className="flex min-h-[calc(100vh-80px)]">
 //         {/* Desktop Sidebar */}
 //         <aside className="hidden lg:block w-80 flex-shrink-0">
-//           {secLoading ? (
-//             <div className="h-full bg-white border-r border-gray-200 flex items-center justify-center">
-//               <div className="flex items-center gap-2">
-//                 <Loader2 className="h-5 w-5 animate-spin" />
-//                 <span className="text-sm text-gray-600">
-//                   {sidebarConfig.loadingText}
-//                 </span>
-//               </div>
-//             </div>
-//           ) : secError ? (
-//             <div className="h-full bg-white border-r border-gray-200 flex items-center justify-center p-4">
-//               <div className="text-center text-sm text-red-600">
-//                 Failed to load sections.
-//               </div>
-//             </div>
-//           ) : (
-//             <DeepSidebar
-//               items={items}
-//               onLeafClick={onLeafClick}
-//               activeLeafId={selectedLesson}
-//               config={sidebarConfig}
-//               isOpen={true}
-//               onClose={() => {}}
-//               onToggle={onToggle}
-//               loadingNodeId={loadingNodeId}
-//               initialExpandedIds={initialExpandedIds}
-//             />
-//           )}
+//           {renderSidebar()}
 //         </aside>
 
 //         {/* Mobile Sidebar */}
@@ -922,92 +1190,31 @@ export default function EssentialsPage() {
 //             </Button>
 //           </SheetTrigger>
 //           <SheetContent side="left" className="p-0 w-80">
-//             {secLoading ? (
-//               <div className="h-full flex items-center justify-center">
-//                 <div className="flex items-center gap-2">
-//                   <Loader2 className="h-5 w-5 animate-spin" />
-//                   <span className="text-sm text-gray-600">
-//                     {sidebarConfig.loadingText}
-//                   </span>
-//                 </div>
-//               </div>
-//             ) : secError ? (
-//               <div className="h-full flex items-center justify-center p-4">
-//                 <div className="text-center text-sm text-red-600">
-//                   Failed to load sections.
-//                 </div>
-//               </div>
-//             ) : (
-//               <DeepSidebar
-//                 items={items}
-//                 onLeafClick={onLeafClick}
-//                 activeLeafId={selectedLesson}
-//                 config={sidebarConfig}
-//                 isOpen={isMobileSidebarOpen}
-//                 onClose={() => setIsMobileSidebarOpen(false)}
-//                 onToggle={onToggle}
-//                 loadingNodeId={loadingNodeId}
-//                 initialExpandedIds={initialExpandedIds}
-//               />
-//             )}
+//             {renderMobileSidebar()}
 //           </SheetContent>
 //         </Sheet>
 
 //         {/* Main Content */}
 //         <main className="flex-1 min-w-0">
 //           <div className="p-4 lg:p-8">
-//             {/* Mobile Search */}
-//             {/* <div className="md:hidden mb-4">
-//               <form
-//                 onSubmit={(e) => {
-//                   e.preventDefault();
-//                   const formData = new FormData(e.currentTarget);
-//                   const query = formData.get("query") as string;
-//                   // Handle search logic here
-//                 }}
+//             {/* Reading Mode Tabs */}
+//             <div className="mb-6">
+//               <Tabs
+//                 value={readMode}
+//                 onValueChange={(value) => handleModeChange(value as ReadMode)}
 //               >
-//                 <div className="bg-white rounded-full flex items-center overflow-hidden shadow-sm border">
-//                   <div className="pl-4">
-//                     <Search className="h-4 w-4 text-gray-400" />
-//                   </div>
-//                   <input
-//                     type="text"
-//                     name="query"
-//                     placeholder="Search in Essentials"
-//                     className="flex-1 px-3 py-3 text-sm text-gray-700 focus:outline-none bg-transparent"
-//                   />
-//                   <Button type="submit" size="sm" className="m-1 rounded-full">
-//                     Search
-//                   </Button>
-//                 </div>
-//               </form>
-//             </div> */}
+//                 <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
+//                   <TabsTrigger value="lesson" className="text-sm">
+//                     Read by Lesson
+//                   </TabsTrigger>
+//                   <TabsTrigger value="chapter" className="text-sm">
+//                     Read by Chapter
+//                   </TabsTrigger>
+//                 </TabsList>
+//               </Tabs>
+//             </div>
 
-//             {secLoading ? (
-//               <div className="max-w-5xl mx-auto">
-//                 <div className="bg-white rounded-2xl border shadow-sm p-6 animate-pulse">
-//                   <div className="h-6 w-48 bg-gray-200 rounded mb-4" />
-//                   <div className="h-4 w-full bg-gray-200 rounded mb-2" />
-//                   <div className="h-4 w-11/12 bg-gray-200 rounded" />
-//                 </div>
-//               </div>
-//             ) : secError ? (
-//               <div className="max-w-5xl mx-auto">
-//                 <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6">
-//                   Failed to load sections.
-//                 </div>
-//               </div>
-//             ) : !(selectedSection && selectedChapter && selectedLesson) ? (
-//               <EmptyState />
-//             ) : (
-//               <div className="max-w-5xl mx-auto">
-//                 <EssentialsContent
-//                   sectionSlug={selectedSection}
-//                   chapterSlug={selectedChapter}
-//                   lessonSlug={selectedLesson}
-//                 />
-//               </div>
-//             )}
+//             {renderMainContent()}
 //           </div>
 //         </main>
 //       </div>
