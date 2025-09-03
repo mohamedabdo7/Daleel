@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, ChevronRight, Loader2, FileText, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -64,7 +64,7 @@ const GenericSidebar: React.FC<GenericSidebarProps> = ({
     const isLoading = loadingCategoryId === item.id;
     const hasChildren = item.children && item.children.length > 0;
     const isCategory = level === 0;
-    const isSelected = selectedItemId === item.id && !isCategory;
+    const isSelected = selectedItemId === item.id;
     const ItemIcon = item.icon || DefaultIcon;
 
     if (isCategory) {
@@ -138,30 +138,28 @@ const GenericSidebar: React.FC<GenericSidebarProps> = ({
         className
       )}
     >
-      <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-[#0A2C75]/5 to-[#03847D]/5">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold text-[#0A2C75] truncate">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-sm text-[#03847D] mt-1 truncate">{subtitle}</p>
-            )}
-          </div>
-          {onClose && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="lg:hidden p-2 flex-shrink-0"
-              aria-label="Close menu"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+      <div
+        className={cn(
+          "p-4 border-b border-gray-200 bg-gradient-to-r from-[#0A2C75]/5 to-[#03847D]/5"
+        )}
+      >
+        <h2 className="text-lg font-semibold text-[#0A2C75] truncate">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-sm text-[#03847D] mt-1 truncate">{subtitle}</p>
+        )}
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="lg:hidden absolute top-3 right-3 p-2"
+          >
+            ×
+          </Button>
+        )}
       </div>
-
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-2">
           {items.length === 0 ? (
@@ -176,29 +174,29 @@ const GenericSidebar: React.FC<GenericSidebarProps> = ({
     </div>
   );
 
-  // Mobile overlay - only when onClose is provided AND on mobile
-  return (
-    <>
-      {onClose && isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-      <div
-        className={cn(
-          onClose
-            ? cn(
-                "fixed top-0 left-0 z-50 w-80 h-full transform transition-transform duration-300 ease-in-out lg:relative lg:w-full lg:max-w-none lg:transform-none lg:z-auto",
-                isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-              )
-            : "w-full h-full"
+  // Mobile overlay
+  if (onClose) {
+    return (
+      <>
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={onClose}
+          />
         )}
-      >
-        {sidebarContent}
-      </div>
-    </>
-  );
+        <div
+          className={cn(
+            "fixed top-0 left-0 z-50 w-80 h-full transform transition-transform duration-300 ease-in-out lg:hidden",
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          {sidebarContent}
+        </div>
+      </>
+    );
+  }
+
+  return sidebarContent;
 };
 
 export default GenericSidebar;

@@ -12,7 +12,8 @@ import {
 } from "@/lib/api/articles.service";
 import { qk } from "@/lib/queryKeys";
 import PageHeader from "@/app/components/common/PageHeader";
-import GenericSidebar, { SidebarConfig, SidebarItem } from "../flow/sidebar";
+import { SidebarConfig, SidebarItem } from "../flow/sidebar";
+import GenericSidebar from "../flow/GenericSidebar";
 
 export default function ArticlesPage() {
   const router = useRouter();
