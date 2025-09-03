@@ -12,7 +12,8 @@ import {
 import { qk } from "@/lib/queryKeys";
 import EmptyState from "./components/emptyState";
 import PageHeader from "@/app/components/common/PageHeader";
-import GenericSidebar, { SidebarConfig, SidebarItem } from "../flow/sidebar";
+import { SidebarConfig, SidebarItem } from "../flow/sidebar";
+import GenericSidebar from "../flow/GenericSidebar";
 
 export default function PowerPointsPage() {
   const router = useRouter();

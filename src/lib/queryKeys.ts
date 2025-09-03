@@ -21,14 +21,43 @@ export const qk = {
       ["powerpoints", "sections", categorySlug] as const,
     item: (slug: string) => ["powerpoints", "item", slug] as const,
   },
+  // handbook: {
+  //   sections: ["handbook", "sections"] as const,
+  //   chapters: (sectionSlug: string) =>
+  //     ["handbook", "chapters", sectionSlug] as const,
+  //   lessons: (sectionSlug: string, chapterSlug: string) =>
+  //     ["handbook", "lessons", sectionSlug, chapterSlug] as const,
+  //   lesson: (sectionSlug: string, chapterSlug: string, lessonSlug: string) =>
+  //     ["handbook", "lesson", sectionSlug, chapterSlug, lessonSlug] as const,
+  // },
   handbook: {
-    sections: ["handbook", "sections"] as const,
-    chapters: (sectionSlug: string) =>
-      ["handbook", "chapters", sectionSlug] as const,
-    lessons: (sectionSlug: string, chapterSlug: string) =>
-      ["handbook", "lessons", sectionSlug, chapterSlug] as const,
-    lesson: (sectionSlug: string, chapterSlug: string, lessonSlug: string) =>
-      ["handbook", "lesson", sectionSlug, chapterSlug, lessonSlug] as const,
+    sections: ["handbook", "sections"],
+    chapters: (sectionSlug: string) => ["handbook", "chapters", sectionSlug],
+    lessons: (sectionSlug: string, chapterSlug: string) => [
+      "handbook",
+      "lessons",
+      sectionSlug,
+      chapterSlug,
+    ],
+    lesson: (sectionSlug: string, chapterSlug: string, lessonSlug: string) => [
+      "handbook",
+      "lesson",
+      sectionSlug,
+      chapterSlug,
+      lessonSlug,
+    ],
+    // New query key for chapter content (all lessons at once)
+    chapterLessons: (
+      sectionSlug: string,
+      chapterSlug: string,
+      lessonSlugs: string[]
+    ) => [
+      "handbook",
+      "chapter-lessons",
+      sectionSlug,
+      chapterSlug,
+      ...lessonSlugs.sort(),
+    ],
   },
   essentials: {
     sections: ["essentials", "sections"] as const,
